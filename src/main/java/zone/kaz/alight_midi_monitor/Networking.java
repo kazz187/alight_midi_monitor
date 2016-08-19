@@ -11,6 +11,7 @@ public class Networking {
 
     private int port;
     private Thread thread;
+    private char[] buffer = null;
 
     public Networking(int port) {
         this.port = port;
@@ -40,17 +41,16 @@ public class Networking {
                             command = headerBuffer.get();
                             length = headerBuffer.getShort();
                             isHeader = false;
-                            System.out.println("chNum: " + chNum);
-                            System.out.println("command: " + command);
-                            System.out.println("length: " + length);
                         } else {
                             ByteBuffer dataBuffer = ByteBuffer.allocate(length);
                             channel.read(dataBuffer);
                             dataBuffer.rewind();
                             int limit = dataBuffer.limit();
+                            char[] buffer = new char[length];
                             for (int i = 0; i < limit; i++) {
-
+                                buffer[i] = (char) (((char) dataBuffer.get(i)) & 0xFF);
                             }
+                            this.buffer = buffer;
                             isHeader = true;
                         }
                     }
@@ -60,6 +60,10 @@ public class Networking {
             }
         });
         thread.start();
+    }
+
+    public char[] getBuffer() {
+        return buffer;
     }
 
 }
